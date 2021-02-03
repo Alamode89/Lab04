@@ -6,27 +6,30 @@ using std::cout;
 using std::endl;
 
 Person::Person(const char *name_, Person* father_, Person* mother_){
-    name = new char[strlen(name_)];
-    strcpy(name, name_);
-    father = father_;
-    mother = mother_;
+    this->name = new char[strlen(name_) + 1];
+    strcpy(this->name, name_);
+    this->father = father_;
+    this->mother = mother_;
     capacity = 1;
     numChildren = 0;
     children = new Person*[capacity];
 }
 
 Person::~Person(){
-    delete children;
+    delete[] name;
+    delete[] children;
 }
 
 void Person::addChild(Person *newChild){
     if(numChildren == capacity) expand(&children, &capacity);
     children[numChildren++] = newChild;
+    newChild = nullptr;
 }
 
 void Person::printAncestors(){
     cout << endl << "Ancestors of " << name << endl;
     printLineage('u', 0);
+
 }
 
 void Person::printDecendents(){
@@ -52,6 +55,8 @@ void Person::printLineage(char dir, int level){
             father->printLineage(dir, level + 1);
         }
     }
+    delete[] temp;
+    temp = nullptr;
 }
 
 /* helper function to compute the lineage
@@ -66,7 +71,11 @@ char* Person::compute_relation(int level){
     for(int i = 2; i <= level; i++){
         char *temp2 = new char[strlen("great ") + strlen(temp) + 1];
         strcat(strcpy(temp2, "great "), temp);
+        char *temp3 = temp;
         temp = temp2;
+        delete[] temp3;
+        temp2 = nullptr;
+        temp3 = nullptr;
     }
     return temp;
 }
@@ -78,5 +87,10 @@ void expand(Person ***t, int *MAX){
   Person **temp = new Person*[2 * *MAX];
   memcpy(temp, *t, *MAX * sizeof(**t));
   *MAX *= 2;
+  Person **temp1 = *t;
   *t = temp;
+  delete[] temp1;
+  temp = nullptr;
+  temp1 = nullptr;
+  MAX = nullptr;
 }
